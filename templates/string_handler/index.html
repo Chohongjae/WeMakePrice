@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WeMakePrice 문자열 처리</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <style>
+        table {
+            border-collapse: separate;
+            border-spacing: 0 20px;
+        }
+    </style>
+</head>
+<body>
+<div>
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td>URL</td>
+            <td><input type="url" name="url" id="url"/></td>
+        </tr>
+        <tr>
+            <td>Type</td>
+            <td>
+                <select name="type" id="type">
+                    <option value="exclude_html_tag">HTML 태그제외</option>
+                    <option value="include_html_tag">Text 전체</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>출력묶음단위(자연수)</td>
+            <td><input type="number" min="1" name="count" id="count"/></td>
+            <td>
+                <button id='parse_string' class='button' onclick='parse_string()'>출력</button>
+            </td>
+        </tr>
+    </table>
+    <table id="result">
+        <tr>
+            <td>몫 :</td>
+            <td>
+                <div id="quotient"></div>
+            </td>
+        </tr>
+        <tr>
+            <td>나머지 :</td>
+            <td>
+                <div id="remainder"></div>
+            </td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript">
+    const csrftoken = $('[name=csrfmiddlewaretoken]').val();
+
+    function csrfSafeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader('X-CSRFToken', csrftoken);
+            }
+        }
+    });
+
+    function parse_string() {
+        const url = $('#url').val();
+        const type = $('#type').val();
+        const count = $('#count').val();
+
+        if (url && count && count > 0) {
+            $.ajax({
+                url: '',
+                method: 'POST',
+                data: {
+                    url: url,
+                    type: type,
+                    count: count
+                },
+                dataType: 'json'
+            }).done(function (resp) {
+                $('#quotient').text(resp.detail['quotient']);
+                $('#remainder').text(resp.detail['remainder']);
+            }).fail(function (xhr, status, errorThrown) {
+                alert('문제가 발생했습니다.');
+                console.error('Error: ' + errorThrown);
+                console.error('Status: ' + status);
+                console.dir(xhr);
+            });
+        } else {
+            alert("url 혹은 출력묶음단위(1이상)를 입력하세요.");
+        }
+    }
+</script>
+</body>
+</html>
