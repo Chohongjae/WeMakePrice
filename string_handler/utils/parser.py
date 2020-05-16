@@ -14,6 +14,17 @@ class Parser:
         return requests.get(self.url).text
 
     def distribute_text(self, text):
+        '''
+        조건(condition)에 따라 html 태그를 포함할지 안할지를 선택하고
+        html 문서 안에 숫자와 영어를 분리해서 반환한다.
+        만약 html 태그를 포함하지 않을 경우 문서 중간에
+        <body>
+            <테스트입니다.
+        </body>
+        이런 텍스트가 나올 경우 "<" 가 열려있고 스택에 담겨있기 때문에 그 밑에 글자들은 포함되지 않는다.
+        :param text: html 문서
+        :return: html 문서안에 영어와 숫자 배열
+        '''
         stack = []
         alphabet = []
         decimal = []
@@ -39,9 +50,15 @@ class Parser:
 
     @staticmethod
     def merge_each_items(alphabet, decimal):
+        '''
+        알파벳과 숫자 배열을 알파벳이 앞에 나오게 하나씩 짝지어서 이어진 문자열을 반환한다.
+        '''
         return ''.join([item for items in zip_longest(alphabet, decimal) for item in items if item is not None])
 
     def divide_text(self, text):
+        '''
+        주어진 출력묶음단위에 따라 문자열을 잘라 몫과 나머지를 반환한다.
+        '''
         length = len(text)
         if length < self.count:
             quotient = ''

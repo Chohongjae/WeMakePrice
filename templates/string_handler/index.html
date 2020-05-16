@@ -38,13 +38,13 @@
     </table>
     <table id="result">
         <tr>
-            <td>몫 :</td>
+            <td>몫</td>
             <td>
                 <div id="quotient"></div>
             </td>
         </tr>
         <tr>
-            <td>나머지 :</td>
+            <td>나머지</td>
             <td>
                 <div id="remainder"></div>
             </td>
@@ -85,7 +85,8 @@
                 $('#quotient').text(resp.detail['quotient']);
                 $('#remainder').text(resp.detail['remainder']);
             }).fail(function (xhr, status, errorThrown) {
-                alert('문제가 발생했습니다.');
+                const errorMessage = xhr.responseJSON.detail;
+                alert(errorMessage);
                 console.error('Error: ' + errorThrown);
                 console.error('Status: ' + status);
                 console.dir(xhr);

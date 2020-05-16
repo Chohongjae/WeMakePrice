@@ -12,36 +12,24 @@ class StringHandlerView(View):
 
     def post(self, request):
         post_data = request.POST
-        parser = Parser(post_data['url'])
+        if not post_data.get('url') or post_data.get('type') not in ['include_html_tag', 'exclude_html_tag'] or \
+                int(post_data.get('count')) < 1:
+            return JsonResponse({"detail": "유효한 값을 입력해주세요."}, status=HttpResponseBadRequest.status_code)
+
         try:
+            parser = Parser(post_data['url'], post_data['type'], int(post_data['count']))
             html = parser.get_html()
         except Exception as e:
-            return JsonResponse({
-                "is_valid": False,
-                "detail": str(e)
-            }, status=HttpResponseBadRequest.status_code)
+            return JsonResponse({"detail": str(e)}, status=HttpResponseBadRequest.status_code)
 
-        alphabet, decimal = parser.distribute_text(html, post_data['type'])
+        alphabet, decimal = parser.distribute_text(html)
         alphabet.sort(key=lambda alpha: (alpha.casefold(), alpha))
         decimal.sort()
 
         result = parser.merge_each_items(alphabet, decimal)
-        length = len(result)
-        if length < int(post_data['count']):
-            quotient = ''
-            remainder = result
-        elif length == int(post_data['count']):
-            quotient = result
-            remainder = ''
-        else:
-            quotient = result[:(length // int(post_data['count'])) * int(post_data['count'])]
-            if quotient == result:
-                remainder = ''
-            else:
-                remainder = result[-(length % int(post_data['count'])):]
+        quotient, remainder = parser.divide_text(result)
 
         return JsonResponse({
-            "is_valid": True,
             "detail": {
                 'quotient': quotient,
                 'remainder': remainder
